@@ -1,0 +1,4 @@
+[core]
+    remote = almacenamiento
+['remote "almacenamiento"']
+    url = s3://andrutp-taller3-dvc-2026/dsa-siniestralidad

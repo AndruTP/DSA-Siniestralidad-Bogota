@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero de priorización de seguridad vial · Bogotá</title>
+<style>
+:root{--navy:#111a33;--bg:#f3f5f9;--card:#fff;--line:#e3e7ef;--ink:#1b2438;--mute:#667085;--blue:#2b4acb;--up:#d92d20;--down:#12873f;--accent:#e8590c}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+aside{width:210px;background:var(--navy);color:#cbd3e6;padding:20px 14px;flex-shrink:0}
+aside h1{font-size:15px;color:#fff;margin:0 6px 22px;line-height:1.3}
+aside button{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;font:inherit;font-size:14px;padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px}
+aside button:hover{background:#1c2748}
+aside button.on{background:var(--blue);color:#fff}
+aside button:focus-visible,.seg button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{flex:1;padding:24px 28px;min-width:0}
+h2.t{font-size:24px;margin:0}
+.sub{color:var(--mute);margin:4px 0 16px;font-size:14px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.filters label{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--mute);display:flex;flex-direction:column}
+.filters select{border:0;font:inherit;font-size:14px;color:var(--ink);background:none;padding:2px 0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(12,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.card h3{margin:0 0 2px;font-size:16px}
+.card .hint{margin:0 0 10px;font-size:12.5px;color:var(--mute)}
+.k{grid-column:span 4}
+.k .lab{font-size:13px;color:var(--mute)}
+.k .val{font-size:34px;font-weight:700;margin:4px 0}
+.k .val.or{color:var(--accent)}
+.k .foot{font-size:12.5px;color:var(--mute)}
+.dn{color:var(--down)}.upc{color:var(--up)}
+.c-evo{grid-column:span 7}.c-rank{grid-column:span 5}
+.c-det{grid-column:span 7}.c-how{grid-column:span 5}
+.note{grid-column:span 12;background:#fff8e6;border:1px solid #f1deaa;border-radius:8px;padding:10px 14px;font-size:13px;color:#7a5200}
+svg{width:100%;height:auto;display:block}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:2px 0 10px}
+.seg button{border:0;background:#fff;font:inherit;font-size:13px;padding:6px 12px;cursor:pointer;color:var(--mute)}
+.seg button.on{background:var(--navy);color:#fff}
+.rk{width:100%;border-collapse:collapse;font-size:13.5px}
+.rk th{font-size:11.5px;color:var(--mute);font-weight:600;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}
+.rk td{padding:7px 6px;border-bottom:1px solid #f0f2f7;vertical-align:middle}
+.rk .n{text-align:right;font-variant-numeric:tabular-nums}
+.div{position:relative;height:14px;min-width:120px}
+.div::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#98a2b3}
+.div i{position:absolute;top:2px;height:10px;border-radius:2px}
+.pill{font-weight:600;white-space:nowrap}
+.how ul{margin:0;padding-left:18px;font-size:14px;line-height:1.6}
+.view{display:none}.view.on{display:block}
+.heat{border-collapse:collapse;font-size:12px;width:100%}
+.heat td,.heat th{padding:5px 6px;text-align:center}
+.heat td:first-child,.heat th:first-child{text-align:left;white-space:nowrap}
+.meta{font-size:14px;line-height:1.9}
+.meta b{display:inline-block;min-width:170px}
+@media(max-width:900px){body{flex-direction:column}aside{width:100%;display:flex;flex-wrap:wrap;gap:4px;padding:10px}aside h1{width:100%;margin:0 4px 6px}aside button{width:auto}
+.k,.c-evo,.c-rank,.c-det,.c-how{grid-column:span 12}main{padding:16px}}
+</style>
+</head>
+<body>
+<aside>
+  <h1>Siniestralidad Vial Bogotá</h1>
+  <nav>
+    <button class="on" data-v="resumen">Resumen</button>
+    <button data-v="pronostico">Pronóstico por localidad</button>
+    <button data-v="historica">Exploración histórica</button>
+    <button data-v="desempeno">Desempeño del modelo</button>
+    <button data-v="metodologia">Datos y metodología</button>
+  </nav>
+</aside>
+
+<main>
+<!-- ============ RESUMEN ============ -->
+<section id="resumen" class="view on">
+  <h2 class="t">Tablero de priorización de seguridad vial</h2>
+  <p class="sub">Siniestros con heridos o muertos en Bogotá y cuántos se esperan el próximo mes.</p>
+  <div class="filters">
+    <label>Localidad<select><option>Todas</option></select></label>
+    <label>Periodo histórico<select><option>2016 – 2025</option></select></label>
+    <label>Gravedad<select><option>Con heridos + con muertos</option></select></label>
+    <label>Mes a pronosticar<select><option>Enero 2026</option></select></label>
+  </div>
+
+  <div class="grid">
+    <div class="card k"><div class="lab">Siniestros con víctimas en 2025</div><div class="val">11.598</div><div class="foot"><span class="dn">▼ 10,6 %</span> frente a 2024 (12.977)</div></div>
+    <div class="card k"><div class="lab">Siniestros esperados en enero 2026</div><div class="val or">952</div><div class="foot">En enero 2025 hubo 955</div></div>
+    <div class="card k"><div class="lab">Margen de error típico</div><div class="val">±7</div><div class="foot">siniestros por localidad al mes (19 de 20 localidades con pronóstico)</div></div>
+
+    <div class="card c-evo">
+      <h3>Evolución mensual y pronóstico</h3>
+      <p class="hint">Siniestros con víctimas por mes en Bogotá, y el valor esperado para enero 2026.</p>
+      <svg id="evo" viewBox="0 0 640 280" role="img" aria-label="Línea de siniestros mensuales 2016 a 2025 con pronóstico de enero 2026"></svg>
+    </div>
+
+    <div class="card c-rank">
+      <h3 id="rkTitle">Localidades donde se espera más siniestros de lo habitual</h3>
+      <p class="hint">Enero 2026 frente a enero 2025. Solo localidades con 30 o más siniestros esperados.</p>
+      <div class="seg" role="group" aria-label="Ordenar ranking">
+        <button class="on" data-s="aumento">Mayor aumento</button>
+        <button data-s="volumen">Mayor volumen</button>
+      </div>
+      <table class="rk">
+        <thead><tr><th>Localidad</th><th class="n">Esperado</th><th class="n">Ene 2025</th><th>Cambio frente a ene 2025</th><th class="n">Dif.</th></tr></thead>
+        <tbody id="rkBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card c-det">
+      <h3>Detalle: Kennedy</h3>
+      <p class="hint">Siniestros por mes en 2023–2025 y valor esperado para enero 2026.</p>
+      <svg id="ken" viewBox="0 0 640 220" role="img" aria-label="Siniestros mensuales de Kennedy 2023 a 2025 y pronóstico"></svg>
+    </div>
+
+    <div class="card c-how how">
+      <h3>Cómo leer este pronóstico</h3>
+      <p class="hint">Tres ideas para usar el tablero.</p>
+      <ul>
+        <li>El número naranja es lo que se espera que pase, no lo que ya pasó.</li>
+        <li>Una barra roja indica que se espera más que en enero 2025; verde, menos.</li>
+        <li>El margen de error muestra cuánto puede variar el valor esperado.</li>
+      </ul>
+    </div>
+
+    <div class="note"><b>Ojo:</b> son conteos de siniestros, no tasas por habitante. Los detalles técnicos están en “Datos y metodología”.</div>
+  </div>
+</section>
+
+<!-- ============ OTRAS VISTAS ============ -->
+<section id="pronostico" class="view"><h2 class="t">Pronóstico por localidad</h2><p class="sub">Vista pendiente de construir.</p></section>
+
+<section id="historica" class="view">
+  <h2 class="t">Exploración histórica</h2>
+  <p class="sub">Promedio mensual de siniestros con víctimas por localidad y año (12 localidades con más registros). Datos ilustrativos.</p>
+  <div class="card"><table class="heat" id="heat"></table></div>
+</section>
+
+<section id="desempeno" class="view"><h2 class="t">Desempeño del modelo</h2><p class="sub">Vista pendiente de construir.</p></section>
+
+<section id="metodologia" class="view">
+  <h2 class="t">Datos y metodología</h2>
+  <p class="sub">Ficha técnica para el analista.</p>
+  <div class="card meta">
+    <b>Objetivo</b> Siniestros con víctimas, mes t+1<br>
+    <b>Entrenamiento</b> 2017–2023 · validación 2024<br>
+    <b>Prueba</b> 2025 (12 meses × 10 localidades)<br>
+    <b>Referencia a superar</b> MAE 7,29 (media móvil 3 meses)<br>
+    <b>Modelo actual</b> Media móvil 3 m (v0) · pronósticos ilustrativos mientras se entrena el modelo<br>
+    <b>Variables</b> Rezagos 1/3/6/12, medias móviles, mes<br>
+    <b>Datos</b> DVC · MD5 16e4761c…<br>
+    <b>Cambio de registro</b> Desde oct 2022 se registran también choques con solo daños (excluidos del objetivo). 2026 es parcial y no se usa para entrenar.<br>
+    <b>Fuente</b> SDM · ACCIDENTE · datos hasta dic 2025
+  </div>
+</section>
+</main>
+
+<script>
+/* ---------- Navegación ---------- */
+document.querySelectorAll("aside button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("aside button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id===b.dataset.v));
+}));
+
+/* ---------- Datos ILUSTRATIVOS: reemplazar por los reales ---------- */
+const noise=i=>{const x=Math.sin(i*12.9898)*43758.5453;return x-Math.floor(x)-.5};
+const city=[];
+for(let i=0;i<120;i++){
+  let v;
+  if(i<48)v=1500+i*16+noise(i)*240;
+  else if(i<51)v=2300+noise(i)*100;
+  else if(i===51)v=650;
+  else if(i<81)v=900+(i-52)*10+noise(i)*140;
+  else v=1080-(i-81)*1.2+noise(i)*130;
+  city.push(Math.round(v));
+}
+const kennedy=Array.from({length:36},(_,i)=>Math.round(160+22*Math.sin(i/2.4)-i*.6+noise(i+7)*30));
+const loc=[ // [localidad, esperado ene 2026, observado ene 2025]
+ ["Kennedy",124,142],["Suba",90,93],["Puente Aranda",85,65],["Engativá",85,71],["Bosa",67,49],
+ ["Fontibón",60,77],["Ciudad Bolívar",53,61],["Usaquén",44,52],["Santa Fe",43,38],["Rafael Uribe Uribe",43,39]];
+
+/* ---------- Gráfico de línea (SVG) ---------- */
+function line(id,vals,{labels,fc,yMax,color="#2b4acb"}){
+  const W=640,H=+document.getElementById(id).viewBox.baseVal.height,m={l:40,r:60,t:12,b:24};
+  const iw=W-m.l-m.r,ih=H-m.t-m.b,n=vals.length+1;
+  const X=i=>m.l+i/(n-1)*iw,Y=v=>m.t+ih-v/yMax*ih;
+  let s="";
+  for(let t=0;t<=4;t++){const v=yMax/4*t;s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e8ecf3"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="#667085">${Math.round(v)}</text>`}
+  labels.forEach(([i,t])=>s+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle" font-size="11" fill="#667085">${t}</text>`);
+  const pts=vals.map((v,i)=>`${X(i)},${Y(v)}`).join(" ");
+  s+=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/>`;
+  const lx=X(vals.length-1),ly=Y(vals[vals.length-1]);
+  s+=`<line x1="${lx}" y1="${ly}" x2="${X(n-1)}" y2="${Y(fc)}" stroke="#e8590c" stroke-width="2" stroke-dasharray="4 3"/>`;
+  s+=`<circle cx="${X(n-1)}" cy="${Y(fc)}" r="5" fill="#e8590c"/><text x="${X(n-1)-8}" y="${Y(fc)-12}" text-anchor="end" font-size="13" font-weight="700" fill="#e8590c">Esperado: ${fc}</text>`;
+  document.getElementById(id).innerHTML=s;
+}
+line("evo",city,{fc:952,yMax:2500,labels:[0,24,48,72,96].map((i,k)=>[i,2016+k*2])});
+line("ken",kennedy,{fc:124,yMax:200,labels:[0,12,24].map((i,k)=>[i,2023+k])});
+
+/* ---------- Ranking por desviación ---------- */
+const MIN_VOL=30,MAX_DIF=20;
+let modo="aumento";
+function ranking(){
+  const rows=loc.filter(r=>r[1]>=MIN_VOL).map(([n,e,o])=>({n,e,o,d:e-o,p:(e-o)/o*100}));
+  rows.sort(modo==="aumento"?(a,b)=>b.d-a.d:(a,b)=>b.e-a.e);
+  document.getElementById("rkTitle").textContent=modo==="aumento"?"Localidades donde se espera más siniestros de lo habitual":"Localidades con más siniestros esperados";
+  document.getElementById("rkBody").innerHTML=rows.map(r=>{
+    const w=Math.min(Math.abs(r.d)/MAX_DIF,1)*50,up=r.d>0,c=up?"var(--up)":"var(--down)";
+    const bar=`<div class="div"><i style="background:${c};width:${w}%;${up?"left:50%":"right:50%"}"></i></div>`;
+    const sg=up?"+":"";
+    return `<tr><td>${r.n}</td><td class="n"><b>${r.e}</b></td><td class="n">${r.o}</td><td>${bar}</td>
+    <td class="n pill" style="color:${c}">${sg}${r.d} <small>(${sg}${r.p.toFixed(0)} %)</small></td></tr>`}).join("");
+}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+  modo=b.dataset.s;
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x===b));
+  ranking();
+}));
+ranking();
+
+/* ---------- Mapa de calor (Exploración histórica) ---------- */
+const perfil=[1,1.04,1.1,1.07,.84,.6,.65,.63,.6,.53];
+const base=[["Kennedy",247],["Engativá",155],["Suba",163],["Puente Aranda",121],["Bosa",102],["Fontibón",104],["Ciudad Bolívar",101],["Rafael Uribe Uribe",74],["Teusaquillo",72],["San Cristóbal",82],["Barrios Unidos",72],["Usaquén",90]];
+let h="<tr><th>Localidad</th>"+perfil.map((_,i)=>`<th>${2016+i}</th>`).join("")+"</tr>";
+base.forEach(([n,b])=>{
+  h+=`<tr><td>${n}</td>`+perfil.map((p,i)=>{
+    const v=Math.round(b*p*(1+noise(i+b)*.08)),a=Math.min(v/280,1);
+    return `<td style="background:rgba(232,89,12,${(a*.85+.05).toFixed(2)});color:${a>.55?"#fff":"#1b2438"}">${v}</td>`}).join("")+"</tr>";
+});
+document.getElementById("heat").innerHTML=h;
+</script>
+</body>
+</html>

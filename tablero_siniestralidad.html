@@ -226,5 +226,70 @@ base.forEach(([n,b])=>{
 });
 document.getElementById("heat").innerHTML=h;
 </script>
+
+<script>
+fetch('dashboard/data/datos.json')
+.then(r => {
+  if (!r.ok) throw new Error('No se pudo cargar datos.json');
+  return r.json();
+})
+.then(datos => {
+  const h = datos.historico;
+
+  // Indicador anual real
+  const total = anio => h
+    .filter(x => x.PERIODO.startsWith(String(anio)))
+    .reduce((s,x) => s + Number(x.SINIESTROS), 0);
+
+  const t2025 = total(2025), t2024 = total(2024);
+  const variacion = (t2025/t2024-1)*100;
+
+  const k = document.querySelectorAll('#resumen .card.k');
+  k[0].querySelector('.val').textContent =
+    t2025.toLocaleString('es-CO');
+  k[0].querySelector('.foot').textContent =
+    variacion.toFixed(1) + '% frente a 2024 (' +
+    t2024.toLocaleString('es-CO') + ')';
+
+  // Mapa de calor: promedio mensual real por localidad/año
+  const localidades = [...new Set(h.map(x=>x.LOCALIDAD))];
+  const anios = [...new Set(h.map(x=>Number(x.PERIODO.slice(0,4))))].sort();
+
+  const acumulado = {};
+  h.forEach(x=>{
+    const key=x.LOCALIDAD+'|'+x.PERIODO.slice(0,4);
+    acumulado[key]=(acumulado[key]||0)+Number(x.SINIESTROS);
+  });
+
+  localidades.sort((a,b)=>
+    (acumulado[b+'|2025']||0)-(acumulado[a+'|2025']||0));
+
+  const valores = localidades.flatMap(loc=>
+    anios.map(y=>(acumulado[loc+'|'+y]||0)/12));
+  const max = Math.max(...valores,1);
+
+  document.getElementById('heat').innerHTML =
+    '<tr><th>Localidad</th>'+
+    anios.map(y=>'<th>'+y+'</th>').join('')+'</tr>'+
+    localidades.map(loc=>
+      '<tr><td>'+loc+'</td>'+
+      anios.map(y=>{
+        const v=(acumulado[loc+'|'+y]||0)/12;
+        const a=v/max;
+        return '<td style="background:rgba(232,89,12,'+
+          (a*.85+.05).toFixed(2)+
+          ');color:'+(a>.55?'#fff':'#1b2438')+
+          '">'+v.toFixed(1)+'</td>';
+      }).join('')+'</tr>'
+    ).join('');
+
+  document.querySelector('#historica .sub').textContent =
+    'Promedio mensual real de siniestros con víctimas por localidad y año (2017–2025).';
+
+  console.log('Dashboard conectado:',h.length,'registros');
+})
+.catch(console.error);
+</script>
+
 </body>
 </html>

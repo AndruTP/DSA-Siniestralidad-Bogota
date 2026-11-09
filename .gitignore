@@ -1,1 +1,7 @@
 /ACCIDENTE.csv
+
+# Datos derivados y temporales
+dataset_modelado_2017_2025.csv
+resultados_mlflow/
+logs/
+.ipynb_checkpoints/

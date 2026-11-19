@@ -58,7 +58,29 @@ El ensamble relativo entrenado con datos de 2019 a 2023 presentó el menor MAE e
 
 #### Estabilidad temporal y aspectos pendientes
 
-Las evaluaciones con ventanas expansivas evidenciaron variaciones importantes entre años, de forma particular el ensamble con inicio en 2019 presentó un deterioro frente a la referencia durante 2022 y 2023, lo que limita su selección a partir del resultado favorable obtenido en 2024, adicionalmente, se identificaron diferencias entre las métricas registradas en el notebook y una ejecución de MLflow. Por lo tanto, se requiere conciliar estos resultados, ampliar la comparación temporal de configuraciones y justificar los hiperparámetros antes de establecer el modelo definitivo, por lo cual la evaluación final sobre 2025 permanece reservada hasta completar y congelar el procedimiento de selección del modelo.
+Las evaluaciones con ventanas expansivas evidenciaron variaciones importantes entre años, especialmente en el ensamble con inicio en 2019, que presentó un deterioro frente a la referencia durante 2022 y 2023. Para ampliar este análisis, se compararon cuatro configuraciones de hiperparámetros con diferentes ventanas de entrenamiento, identificando que la alternativa de menor complejidad redujo el error respecto al ensamble original, aunque no superó la referencia histórica en el promedio de ambos años. Continúa pendiente conciliar las diferencias entre las métricas del notebook y MLflow, así como definir y documentar la selección definitiva del modelo antes de realizar la evaluación final de 2025.
+
+#### Ajuste de hiperparámetros y validación temporal
+
+Para complementar la evaluación inicial se compararon cuatro configuraciones de hiperparámetros del ensamble relativo, considerando diferentes niveles de complejidad, flexibilidad y regularización. Se utilizaron ventanas de entrenamiento con inicio en 2017 y 2019, evaluando los resultados de 2022 y 2023 mediante un procedimiento temporal expansivo. En total se realizaron 16 ajustes exploratorios, correspondientes a cuatro configuraciones, dos ventanas de inicio y dos años de evaluación. La comparación se efectuó utilizando el MAE y la mejora porcentual frente a la media móvil de 12 meses.
+
+#### Resultados de la comparación 2022-2023
+
+| Configuración | Inicio | MAE modelo | MAE referencia | Mejora |
+|---|---:|---:|---:|---:|
+| Menor complejidad | 2017 | 6,8607 | 6,8088 | -0,76 % |
+| Mayor regularización | 2017 | 6,8974 | 6,8088 | -1,30 % |
+| Original | 2017 | 6,9878 | 6,8088 | -2,63 % |
+| Mayor flexibilidad | 2017 | 7,0406 | 6,8088 | -3,40 % |
+| Menor complejidad | 2019 | 8,8277 | 6,8088 | -29,65 % |
+
+La configuración de menor complejidad con entrenamiento desde 2017 obtuvo el menor MAE promedio entre las alternativas evaluadas, alcanzando 6,8607 frente a 6,8088 de la referencia. Aunque representa una mejora respecto a la configuración original del ensamble, no logró superar el comportamiento de la media móvil de 12 meses en el promedio de ambos años, al revisar los resultados individualmente se observa que esta configuración presentó una mejora del 0,29 % durante 2022, mientras que en 2023 registró un deterioro del 1,78 %. Esto evidencia que la reducción de complejidad favoreció el desempeño respecto al ensamble original, pero no garantizó una ventaja sostenida frente a la referencia histórica.
+
+#### Interpretación y selección del modelo
+
+Los experimentos muestran que el desempeño de los ensambles depende tanto de los hiperparámetros como de la ventana de entrenamiento utilizada. La configuración seleccionada inicialmente por su resultado de 2024 no demuestra superioridad consistente al considerar los años anteriores, porr lo tanto la media móvil de 12 meses continúa siendo una referencia competitiva y no se cuenta todavía con evidencia suficiente para adoptar el ensamble como modelo operativo definitivo.
+
+La comparación realizada es exploratoria y requiere complementar su trazabilidad experimental en MLflow. La evaluación final de 2025 permanece reservada hasta establecer y documentar la selección definitiva del modelo.
 
 ### 4. Análisis de errores por localidad
 Se realizó un análisis territorial del ensamble relativo entrenado con datos de 2019 a 2023, utilizando las 228 observaciones correspondientes a la validación de 2024. Se calcularon el error absoluto medio (MAE), el sesgo de las predicciones y el porcentaje de mejora frente a la media móvil de 12 meses para las 19 localidades consideradas. Los resultados muestran que el modelo supera la referencia histórica en 13 localidades, mientras que en las otras 6 presenta un mayor error, lo que evidencia diferencias en su capacidad predictiva según el territorio.

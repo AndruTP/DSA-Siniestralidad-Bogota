@@ -61,7 +61,27 @@ El ensamble relativo entrenado con datos de 2019 a 2023 presentó el menor MAE e
 Las evaluaciones con ventanas expansivas evidenciaron variaciones importantes entre años, de forma particular el ensamble con inicio en 2019 presentó un deterioro frente a la referencia durante 2022 y 2023, lo que limita su selección a partir del resultado favorable obtenido en 2024, adicionalmente, se identificaron diferencias entre las métricas registradas en el notebook y una ejecución de MLflow. Por lo tanto, se requiere conciliar estos resultados, ampliar la comparación temporal de configuraciones y justificar los hiperparámetros antes de establecer el modelo definitivo, por lo cual la evaluación final sobre 2025 permanece reservada hasta completar y congelar el procedimiento de selección del modelo.
 
 ### 4. Análisis de errores por localidad
-Pendiente de consolidar los resultados del modelo seleccionado.
+Se realizó un análisis territorial del ensamble relativo entrenado con datos de 2019 a 2023, utilizando las 228 observaciones correspondientes a la validación de 2024. Se calcularon el error absoluto medio (MAE), el sesgo de las predicciones y el porcentaje de mejora frente a la media móvil de 12 meses para las 19 localidades consideradas. Los resultados muestran que el modelo supera la referencia histórica en 13 localidades, mientras que en las otras 6 presenta un mayor error, lo que evidencia diferencias en su capacidad predictiva según el territorio.
+
+#### Resultados territoriales destacados
+
+| Localidad | MAE modelo | MAE referencia | Mejora |
+|---|---:|---:|---:|
+| Kennedy | 16,2184 | 15,7639 | -2,88 % |
+| Suba | 8,8746 | 12,6528 | +29,86 % |
+| Fontibón | 9,2064 | 11,2083 | +17,86 % |
+| Puente Aranda | 9,1913 | 10,2500 | +10,33 % |
+| Engativá | 7,5147 | 8,0139 | +6,23 % |
+| Santa Fe | 7,1945 | 5,8403 | -23,19 % |
+| Tunjuelito | 6,5285 | 4,9653 | -31,48 % |
+
+Kennedy presenta el mayor error absoluto medio del modelo, con 16,2184 siniestros por localidad-mes, superando el error de la referencia. Por el contrario, Suba registra una reducción del 29,86 % y Fontibón del 17,86 %, mostrando un mejor comportamiento predictivo respecto a sus promedios históricos, asi mismo se identificaron diferencias en el sesgo de las predicciones en donde Engativá presenta un sesgo positivo de 4,1767, lo que indica una tendencia a sobreestimar los siniestros, mientras que Usaquén registra un sesgo de -4,1654, reflejando una tendencia a subestimarlos.
+
+#### Interpretación de los resultados
+
+Aunque el ensamble alcanza una mejora global del 4,4846 % frente a la referencia, su desempeño no es uniforme entre localidades. Por esta razón, los resultados deben interpretarse considerando tanto el error global como las diferencias territoriales, en localidades donde el modelo presenta mayores errores que la referencia, como Kennedy, Santa Fe y Tunjuelito, sus predicciones requieren especial precaución antes de orientar una revisión de prioridades. Estos resultados permiten identificar dónde el modelo ofrece una estimación más precisa y dónde se requiere fortalecer su evaluación. Sin embargo, no constituyen por sí solos una medida de riesgo vial ni justifican automáticamente cambios en la asignación de recursos.
+
+El análisis corresponde exclusivamente a la validación de 2024 y debe complementarse con la evaluación de estabilidad temporal antes de establecer el modelo definitivo.
 
 ### 5. Tablero, API y despliegue
 Pendiente de integrar los avances de Andrés y Jairo.

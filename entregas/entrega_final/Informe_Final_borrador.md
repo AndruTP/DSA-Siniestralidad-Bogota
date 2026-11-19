@@ -39,7 +39,26 @@ Asi mismo se evaluaron variables derivadas como la media móvil exponencial de s
 Las variables históricas se calcularon utilizando información de meses anteriores al periodo que se desea predecir. La selección de características respondió inicialmente a criterios temporales y a su capacidad para representar tendencias, estacionalidad y diferencias territoriales, mientras que su utilidad predictiva debe contrastarse mediante la evaluación temporal de los modelos.
 
 ### 3. Modelos desarrollados y evaluación
-Pendiente de incorporar la validación temporal actualizada y la comparación de hiperparámetros.
+
+Se desarrollaron los diferentes modelos supervisados para estimar el número mensual de siniestros viales con víctimas por localidad, considerando alternativas basadas en Gradient Boosting con pérdida Poisson, regresión binomial negativa (NB2) y modelos relativos con ajuste respecto a la media móvil de 12 meses.
+
+La evaluación inicial se realizó mediante una partición temporal, utilizando los datos de entrenamiento hasta 2023 y reservando 2024 para la validación. La comparación se efectuó frente a una referencia basada en la media móvil de 12 meses, utilizando principalmente el error absoluto medio (MAE), complementado con RMSE y sesgo.
+
+#### Resultados de validación de 2024
+
+| Modelo | MAE | RMSE |
+|---|---:|---:|
+| Media móvil de 12 meses | 7,0146 | 9,5464 |
+| HGB Poisson 2017-2023 | 7,1921 | 10,1549 |
+| NB2 revisada 2017-2023 | 7,3664 | 9,9919 |
+| Ensamble relativo 2019-2023 | 6,7000 | 9,3664 |
+| Ensamble relativo 2021-2023 | 6,7931 | 9,3401 |
+
+El ensamble relativo entrenado con datos de 2019 a 2023 presentó el menor MAE entre las configuraciones comparadas, alcanzando una mejora del 4,4846 % frente a la referencia. Sin embargo, este resultado no cumple la meta inicial de reducir el error en al menos un 10 %.
+
+#### Estabilidad temporal y aspectos pendientes
+
+Las evaluaciones con ventanas expansivas evidenciaron variaciones importantes entre años, de forma particular el ensamble con inicio en 2019 presentó un deterioro frente a la referencia durante 2022 y 2023, lo que limita su selección a partir del resultado favorable obtenido en 2024, adicionalmente, se identificaron diferencias entre las métricas registradas en el notebook y una ejecución de MLflow. Por lo tanto, se requiere conciliar estos resultados, ampliar la comparación temporal de configuraciones y justificar los hiperparámetros antes de establecer el modelo definitivo, por lo cual la evaluación final sobre 2025 permanece reservada hasta completar y congelar el procedimiento de selección del modelo.
 
 ### 4. Análisis de errores por localidad
 Pendiente de consolidar los resultados del modelo seleccionado.

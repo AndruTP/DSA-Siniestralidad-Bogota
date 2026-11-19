@@ -106,7 +106,33 @@ Aunque el ensamble alcanza una mejora global del 4,4846 % frente a la referencia
 El análisis corresponde exclusivamente a la validación de 2024 y debe complementarse con la evaluación de estabilidad temporal antes de establecer el modelo definitivo.
 
 ### 5. Tablero, API y despliegue
-Pendiente de integrar los avances de Andrés y Jairo.
+Pendiente de integrar: avances de Andrés y Jairo.
 
 ### 6. Resultados y conclusiones
-Pendiente de actualizar con los resultados definitivos.
+
+Los experimentos realizados permitieron evaluar diferentes alternativas para pronosticar la cantidad mensual de siniestros viales con víctimas por localidad en Bogotá, comparando su desempeño con la media móvil de 12 meses. El ensamble relativo entrenado entre 2019 y 2023 alcanzó un MAE de 6,7000 durante la validación de 2024, equivalente a una mejora del 4,4846 % frente a la referencia, resultado que no cumple la meta inicial de reducir el error en al menos un 10 %.
+
+#### Estabilidad y selección del modelo
+
+Las evaluaciones temporales evidenciaron diferencias importantes entre años y ventanas de entrenamiento. Al comparar cuatro configuraciones de hiperparámetros durante 2022 y 2023, la alternativa de menor complejidad entrenada desde 2017 obtuvo el menor MAE promedio entre los ensambles evaluados, con 6,8607 frente a 6,8088 de la referencia histórica, aunque esta configuración mejoró el desempeño respecto al ensamble original, no demostró una ventaja sostenida frente a la media móvil de 12 meses, de esta manera con las evidencias disponibles se propone conservar la referencia histórica como alternativa principal de comparación y mantener el ensamble como candidato experimental, sin recomendar todavía su adopción operativa definitiva.
+
+#### Comportamiento territorial
+
+El análisis de errores del ensamble seleccionado inicialmente permitió identificar diferencias en su capacidad predictiva entre localidades. Durante 2024, el modelo mejoró frente a la referencia en 13 localidades y presentó un desempeño inferior en las otras 6, por una parte
+Kennedy registró el mayor MAE del modelo con 16,2184, mientras que Suba y Fontibón presentaron mejoras del 29,86 % y 17,86 % respectivamente.
+
+Estos resultados evidencian que un desempeño global favorable no garantiza la misma precisión en todos los territorios, por lo que resulta necesario considerar los errores locales antes de interpretar los pronósticos.
+
+#### Aplicación a la pregunta de negocio
+
+El propósito del pronóstico no se limita a identificar las localidades que históricamente concentran la mayor cantidad de siniestros viales, sino que busca reconocer cambios en su comportamiento habitual y aportar información que permita anticipar escenarios que requieran mayor atención territorial, se plantea comparar las estimaciones mensuales de cada localidad con su media móvil histórica de 12 meses y con los registros del mismo mes del año anterior, facilitando la identificación de incrementos, disminuciones y variaciones que podrían pasar desapercibidas al analizar únicamente los valores acumulados.
+
+Esta comparación permite fortalecer la revisión de prioridades territoriales, puesto que una localidad con un volumen históricamente moderado podría presentar un incremento esperado que justifique una revisión preventiva, mientras que otra con cifras tradicionalmente elevadas podría mantener un comportamiento estable, al igual que el análisis este no se limita en establecer cuáles territorios registran más siniestros, sino que incorpora una perspectiva sobre cómo podría evolucionar su comportamiento, considerando las particularidades de cada localidad y la precisión de las estimaciones obtenidas.
+
+El proyecto propone adicionalmente un mecanismo de apoyo a la priorización territorial, en el que las variaciones previstas sirven como señales para orientar la revisión de las condiciones de seguridad vial y complementar la planificación de acciones preventivas, aunque la definición de umbrales específicos requiere validaciones adicionales, el valor de la solución radica en integrar la información histórica, las predicciones y el análisis de errores territoriales dentro de un mismo proceso de evaluación, de esta forma el proyecto aporta una base analítica para fortalecer la vigilancia preventiva de la siniestralidad vial en Bogotá, permitiendo identificar territorios que ameritan una revisión más detallada, sustentar técnicamente las prioridades de atención y avanzar hacia decisiones basadas no solamente en lo que ha ocurrido, sino también en los cambios que podrían presentarse en los meses siguientes.
+
+#### Decisión y limitaciones
+
+En relación a los resultados obtenidos se propone mantener la media móvil de 12 meses como referencia principal, debido a su estabilidad frente a las configuraciones evaluadas, mientras que el ensamble relativo se conserva como una alternativa de mejora por su desempeño favorable en determinadas localidades. Aunque no se alcanzó la meta global del 10 %, los experimentos permitieron identificar oportunidades de optimización y establecer criterios más sólidos para la selección del modelo, considerando su comportamiento temporal y territorial.
+
+Para consolidar la solución se contempla verificar la consistencia de los experimentos registrados en MLflow, documentar la configuración seleccionada y completar la evaluación final de 2025, de igual manera los pronósticos representan estimaciones del volumen de siniestros y no tasas de riesgo ajustadas por población o exposición vial, por lo que su interpretación debe complementarse con el análisis de los especialistas, es así que el proyecto establece una base metodológica y analítica para fortalecer la identificación de cambios en la siniestralidad vial y apoyar decisiones preventivas fundamentadas en evidencia, integrando la evaluación predictiva con las necesidades de priorización territorial de Bogotá.

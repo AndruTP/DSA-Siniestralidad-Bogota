@@ -5,3 +5,8 @@ dataset_modelado_2017_2025.csv
 resultados_mlflow/
 logs/
 .ipynb_checkpoints/
+
+# Archivos de carga y validación local (no publicarlos en Git)
+staging/
+resultados_pipeline/
+runtime/

@@ -22,9 +22,18 @@ def main(argv=None):
         args.origen, args.referencia, args.corte
     )
     print(json.dumps(reporte, indent=2, ensure_ascii=False))
-    # Nunca se publica un candidato con discrepancias históricas o calidad pendiente.
+    # Bloqueo conservador: sin CSV candidato, pero con informe de auditoría.
     if reporte["estado"] != "candidato_validado_pendiente_aprobacion":
-        print("La comparación no autoriza preparar un archivo candidato.")
+        auditoria = Path(args.reporte)
+        if auditoria.exists():
+            raise FileExistsError(f"El informe ya existe: {auditoria}; usa otra ruta.")
+        auditoria.parent.mkdir(parents=True, exist_ok=True)
+        auditoria.write_text(
+            json.dumps(reporte, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        print("Actualización bloqueada; informe guardado en:", auditoria)
+        print("NO se creó el dataset candidato. DVC/MLflow/API intactos.")
         return 2
     salida, auditoria = guardar_candidato(candidato, reporte, args.salida, args.reporte)
     print("Candidato preparado:", salida)

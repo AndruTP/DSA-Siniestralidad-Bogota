@@ -41,13 +41,18 @@ def main():
 
     mlflow.set_tracking_uri(args.tracking_uri)
     destino.parent.mkdir(parents=True, exist_ok=True)
+    # Separar la ruta de descarga y destino: no copiar un directorio dentro
+    # de sí mismo si MLflow devuelve como ruta el propio dst_path.
     with tempfile.TemporaryDirectory(prefix=".modelo-v2-", dir=destino.parent) as tmp:
+        tmpdir = Path(tmp)
+        descarga = tmpdir / "descarga"
+        descarga.mkdir()
         descargado = Path(mlflow.artifacts.download_artifacts(
-            artifact_uri=args.modelo, dst_path=tmp
+            artifact_uri=args.modelo, dst_path=str(descarga)
         ))
         if not (descargado / "MLmodel").is_file():
             raise RuntimeError("El Registry no devolvió un directorio de modelo MLflow.")
-        temporal = Path(tmp) / "modelo-validado"
+        temporal = tmpdir / "modelo-validado"
         shutil.copytree(descargado, temporal)
         # Verificar que el modelo exportado se carga antes de activar su copia.
         comprobado = mlflow.pyfunc.load_model(str(temporal))

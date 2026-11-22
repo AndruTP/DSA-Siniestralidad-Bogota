@@ -20,6 +20,7 @@
        <button data-view="pronostico"><span class="symbol">↗</span>Validación 2024</button>
       <button data-view="historica"><span class="symbol">▤</span>Exploración histórica</button>
       <button data-view="desempeno"><span class="symbol">◉</span>Desempeño del modelo</button>
+      <button data-view="actualizacion"><span class="symbol">⟳</span>Actualizar datos</button>
       <button data-view="metodologia"><span class="symbol">⌘</span>Datos y metodología</button>
     </nav>
     <div class="side-bottom"><div class="live"><i class="dot" id="connection-dot"></i><span id="connection-label">Conectando con MLflow...</span></div><p>Prototipo académico MIAD · Datos SDM. La priorización requiere interpretación experta.</p></div>
@@ -85,6 +86,39 @@
         <div class="card w12"><div class="card-head"><div><h2>Ranking territorial del mes evaluado</h2><p>19 predicciones calculadas por el modelo V2 · haz clic en una localidad para explorarla</p></div><div class="seg" id="sort-rank"><button class="active" data-sort="volumen">Mayor volumen</button><button data-sort="cambio">Mayor cambio</button></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>#</th><th>Localidad</th><th class="num">Modelo</th><th class="num">Observado</th><th class="num">MM12</th><th class="num">Cambio frente MM12</th><th class="num">Error absoluto</th></tr></thead><tbody id="ranking-body"></tbody></table></div></div></div></section>
       <section id="historica" class="section" aria-label="Exploración histórica"><div class="grid"><div class="card w12 callout"><strong>Datos observados, no predicciones.</strong> La fuente contiene 2.052 registros localidad–mes (19 localidades, 2017–2025). Las celdas muestran promedios mensuales por año.</div><div class="card w12"><div class="card-head"><div><h2>Mapa de calor territorial</h2><p>Media mensual de siniestros con víctimas · haz clic en cualquier localidad para seleccionarla</p></div><span class="badge">2017—2025</span></div><div class="table-scroll"><table id="heatmap" class="heat-table"></table></div></div><div class="card w7"><div class="card-head"><div><h2>Evolución histórica · <span id="h-name">—</span></h2><p>Registro mensual, sin predicciones</p></div></div><div class="chart" id="chart-h-history"></div></div><div class="card w5"><div class="card-head"><div><h2>Total anual · <span id="h-annual-name">—</span></h2><p>Distribución entre 2017 y 2025</p></div></div><div id="annual-bars" class="bar-chart"></div><div class="legend">Los totales son conteos y no consideran población ni exposición vial.</div></div></div></section>
       <section id="desempeno" class="section" aria-label="Desempeño del modelo"><div class="grid"><div class="card hero w12"><div class="eyebrow">Evaluación verificable · 2024</div><h2>La precisión no es uniforme entre localidades.</h2><p>Métricas calculadas a partir de 228 predicciones V2 servidas por FastAPI (19 localidades × 12 meses) y comparadas con la referencia MM12. No se utilizan cifras ilustrativas.</p></div><div class="card stat w3"><div class="klabel">MAE · modelo V2</div><div class="number" id="d-mae">—</div><div class="sub">Menor es mejor</div></div><div class="card stat w3"><div class="klabel">MAE · referencia MM12</div><div class="number" id="d-base">—</div><div class="sub">Media móvil últimos 12 meses</div></div><div class="card stat w3"><div class="klabel">RMSE · modelo V2</div><div class="number" id="d-rmse">—</div><div class="sub">Penaliza errores grandes</div></div><div class="card stat orange w3"><div class="klabel">Sesgo medio · V2</div><div class="number" id="d-bias">—</div><div class="sub">Positivo = sobreestimación</div></div><div class="card w12 callout warning" id="goal-status">Evaluando cumplimiento de la meta del 10 %...</div><div class="card w7"><div class="card-head"><div><h2>Error medio por mes</h2><p>Comparación de MAE mensual del modelo y la referencia en 2024</p></div></div><div class="chart" id="chart-monthly-error"></div><div class="legend"><span><i class="swatch" style="background:#4f75d4"></i>MAE modelo</span><span><i class="swatch" style="background:#15aa99"></i>MAE MM12</span></div></div><div class="card w5"><div class="card-head"><div><h2>Predicho frente a observado</h2><p>228 comparaciones localidad–mes; diagonal = predicción perfecta</p></div></div><div class="chart" id="chart-scatter"></div></div><div class="card w12"><div class="card-head"><div><h2>Errores por localidad</h2><p>La mejora local se calcula frente a MM12; un MAE global no cuenta toda la historia</p></div><span class="badge">19 localidades</span></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Localidad</th><th class="num">MAE V2</th><th class="num">MAE MM12</th><th class="num">Mejora</th><th class="num">Sesgo V2</th><th>Evaluación</th></tr></thead><tbody id="errors-body"></tbody></table></div></div></div></section>
+      <section id="actualizacion" class="section" aria-label="Actualización controlada de datos">
+        <div class="grid">
+          <div class="card hero w12">
+            <div class="eyebrow">Operación de datos · Sin reentrenamiento automático</div>
+            <h2>Actualizar el histórico y proyectar el siguiente mes.</h2>
+            <p>Carga un archivo ACCIDENTE.csv acumulativo, revisa sus diferencias y aprueba la nueva base. Las proyecciones usarán los datos aprobados con el modelo V2 vigente.</p>
+          </div>
+          <div class="card w12 callout warning" id="ad-access">Comprobando si esta sesión tiene acceso administrativo seguro...</div>
+          <div class="card w7" id="ad-form" hidden>
+            <div class="card-head"><div><h2>1. Carga y preparación de datos</h2><p>Archivo acumulativo de siniestros desde 2016; hasta 450 MB. No reemplaza los datos activos al subirlo.</p></div><span class="badge">Solo administrador</span></div>
+            <label style="display:grid;gap:7px;font-size:12px;font-weight:700">Archivo CSV acumulativo
+              <input type="file" id="ad-file" accept=".csv,text/csv" style="font:inherit;padding:13px;border:1px solid #dce5f3;border-radius:10px">
+            </label>
+            <label style="display:grid;gap:7px;font-size:12px;font-weight:700;margin:18px 0">Último mes cerrado de la fuente (AAAA-MM)
+              <input type="month" id="ad-corte" value="2026-10" style="font:inherit;padding:12px;border:1px solid #dce5f3;border-radius:10px;max-width:240px">
+            </label>
+            <button class="btn" id="ad-preparar" type="button">Validar y preparar actualización</button>
+            <div id="ad-upload-progress" class="summary-small" role="status">El archivo se procesará antes de ofrecer su aprobación.</div>
+          </div>
+          <div class="card w5">
+            <div class="card-head"><div><h2>Estado del sistema</h2><p>Datos actualmente activos en FastAPI</p></div></div>
+            <div id="ad-status" class="rowlist">Consultando información...</div>
+            <div class="callout" style="margin-top:17px">Consultar el Dashboard no ejecuta ningún entrenamiento. El entrenamiento de nuevos modelos seguirá siendo independiente y sometido a aprobación.</div>
+          </div>
+          <div class="card w12" id="ad-review" hidden>
+            <div class="card-head"><div><h2>2. Revisar candidato</h2><p>La aprobación es explícita. No promociona modelos en MLflow.</p></div><span class="badge">Pendiente de aprobación</span></div>
+            <div id="ad-report" class="rowlist"></div>
+            <label style="display:flex;gap:9px;align-items:flex-start;margin:17px 0;font-size:12px"><input type="checkbox" id="ad-confirm"><span>He revisado las diferencias y acepto actualizar los datos activos. Entiendo que el modelo V2 no se reentrenará automáticamente.</span></label>
+            <button class="btn" id="ad-activar" type="button" disabled>Activar datos aprobados</button>
+          </div>
+          <div class="card w12 callout"><strong>Seguridad:</strong> para cargar y aprobar se requiere abrir este Dashboard mediante un túnel SSH local. Desde la dirección IP pública se puede consultar el estado, pero no subir archivos ni activar versiones.</div>
+        </div>
+      </section>
       <section id="metodologia" class="section" aria-label="Datos y metodología"><div class="grid"><div class="card w7"><div class="card-head"><div><h2>Ficha técnica verificable</h2><p>Definiciones y alcance real del prototipo desplegado</p></div><span class="badge">Modelo en MLflow</span></div><div id="technical-card"></div></div><div class="card w5"><div class="card-head"><div><h2>De los datos a la decisión</h2><p>Cadena de trabajo del producto analítico</p></div></div><div class="steps"><div class="step"><span class="n">01</span><div><strong>Fuente: ACCIDENTE, SDM</strong><p>Filtrar siniestros con heridos o fallecidos y agregar por localidad–mes.</p></div></div><div class="step"><span class="n">02</span><div><strong>Panel temporal</strong><p>Rezagos, estacionalidad y medias móviles con información previa al mes evaluado.</p></div></div><div class="step"><span class="n">03</span><div><strong>Validar modelos</strong><p>Entrenar antes de 2024; comparar MAE, RMSE, sesgo y referencia MM12.</p></div></div><div class="step"><span class="n">04</span><div><strong>MLflow → FastAPI → Dashboard</strong><p>Recuperar la versión registrada y servir 228 inferencias en lote.</p></div></div></div></div><div class="card w12 callout warning"><strong>Alcance y limitaciones:</strong> el tablero valida retrospectivamente 2024 y calcula una proyección del mes posterior al corte histórico (enero de 2026). No es un pronóstico operativo para el próximo mes del calendario actual, porque los datos observados terminan en diciembre de 2025. El modelo no predice tasas de riesgo por habitante, no cuenta con intervalos de confianza validados y no sustituye decisiones expertas. La correspondencia exacta del archivo derivado con la versión DVC debe respaldarse con evidencias del pipeline.</div><div class="card w12"><div class="card-head"><div><h2>Trazabilidad del desarrollo</h2><p>Referencias de trabajo para documentar commits y evidencias</p></div></div><div class="rowlist"><div>GitHub: <a href="https://github.com/AndruTP/DSA-Siniestralidad-Bogota" target="_blank" rel="noreferrer">DSA-Siniestralidad-Bogota</a></div><div>Issues: <a href="https://github.com/AndruTP/DSA-Siniestralidad-Bogota/issues/6" target="_blank" rel="noreferrer">#6 Modelos</a> · <a href="https://github.com/AndruTP/DSA-Siniestralidad-Bogota/issues/7" target="_blank" rel="noreferrer">#7 MLflow</a> · <a href="https://github.com/AndruTP/DSA-Siniestralidad-Bogota/issues/8" target="_blank" rel="noreferrer">#8 Dashboard</a> · <a href="https://github.com/AndruTP/DSA-Siniestralidad-Bogota/issues/9" target="_blank" rel="noreferrer">#9 Integración</a></div></div></div></div></section>
     </div>
     <div class="footer"><span>MIAD · Universidad de los Andes · Prototipo académico · Bogotá, Colombia</span><span id="footer-model">Conectando con el registro de modelos...</span></div>
@@ -103,8 +137,8 @@ const mean=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
 const sum=arr=>arr.reduce((a,b)=>a+b,0);
 const group=(array,key)=>{const m=new Map();for(const x of array){const k=key(x);if(!m.has(k))m.set(k,[]);m.get(k).push(x)}return m};
 let H=[],V=[],MODELO='',LOCALIDADES=[],MESES=[],SORT='volumen',VIEW='resumen',summary={};
-const titles={planificacion:["Planificación mensual y recursos","Proyección del siguiente mes tras el corte observado y escenarios ilustrativos de asignación territorial."],resumen:['Panorama de la siniestralidad','Vista ejecutiva de los datos históricos y los resultados territoriales de validación.'],pronostico:['Validación retrospectiva · 2024','Predicciones de 2024 y comparación con registros observados, separadas de la proyección posterior al corte.'],historica:['Exploración histórica','Distribución y evolución territorial de siniestros observados entre 2017 y 2025.'],desempeno:['Desempeño del modelo','Calidad predictiva de V2, diferencias territoriales y contraste frente a la media móvil de 12 meses.'],metodologia:['Datos y metodología','Origen, transformaciones, alcance, métricas y limitaciones del prototipo.']};
-function navigate(view){VIEW=view;$('historical-filters').style.display=view==='planificacion'?'none':'';$('status-pill').textContent=view==='planificacion'&&P?'Proyección '+P.periodo+' · corte '+P.ultimo_mes_observado:'Validación real · 2024';document.querySelectorAll('.section').forEach(n=>n.classList.toggle('active',n.id===view));document.querySelectorAll('.menu button').forEach(n=>n.classList.toggle('active',n.dataset.view===view));$('page-title').textContent=titles[view][0];$('page-desc').textContent=titles[view][1];scrollTo({top:0,behavior:'smooth'})}
+const titles={actualizacion:["Actualización de datos","Preparación y aprobación de nuevos registros sin interrumpir el modelo publicado."],planificacion:["Planificación mensual y recursos","Proyección del siguiente mes tras el corte observado y escenarios ilustrativos de asignación territorial."],resumen:['Panorama de la siniestralidad','Vista ejecutiva de los datos históricos y los resultados territoriales de validación.'],pronostico:['Validación retrospectiva · 2024','Predicciones de 2024 y comparación con registros observados, separadas de la proyección posterior al corte.'],historica:['Exploración histórica','Distribución y evolución territorial de siniestros observados entre 2017 y 2025.'],desempeno:['Desempeño del modelo','Calidad predictiva de V2, diferencias territoriales y contraste frente a la media móvil de 12 meses.'],metodologia:['Datos y metodología','Origen, transformaciones, alcance, métricas y limitaciones del prototipo.']};
+function navigate(view){VIEW=view;$('historical-filters').style.display=['planificacion','actualizacion'].includes(view)?'none':'';$('status-pill').textContent=view==='planificacion'&&P?'Proyección '+P.periodo+' · corte '+P.ultimo_mes_observado:view==='actualizacion'?'Administración · datos':'Validación real · 2024';document.querySelectorAll('.section').forEach(n=>n.classList.toggle('active',n.id===view));document.querySelectorAll('.menu button').forEach(n=>n.classList.toggle('active',n.dataset.view===view));$('page-title').textContent=titles[view][0];$('page-desc').textContent=titles[view][1];scrollTo({top:0,behavior:'smooth'})}
 function monthRows(){return V.filter(x=>x.periodo===$('periodo').value)}
 function locRows(){return V.filter(x=>x.localidad===$('localidad').value).sort((a,b)=>a.periodo.localeCompare(b.periodo))}
 function chosen(){return V.find(x=>x.localidad===$('localidad').value&&x.periodo===$('periodo').value)}
@@ -131,7 +165,7 @@ function renderOverview(){const a=histYear(2025),b=histYear(2024),ma=metric(V),b
 function renderLocalChart(target){const rows=locRows();const selected=Number($('periodo').value.slice(-2))-1;svgLine(target,months,[{name:'Observado',vals:rows.map(x=>x.observado),color:'#4f75d4'},{name:'Predicho',vals:rows.map(x=>x.prediccion),color:'#ee9b60'},{name:'MM12',vals:rows.map(x=>x.base_mm12),color:'#13a998',width:1.9,dashed:true}],{marks:12,selected,title:'Observado, modelo V2 y referencia durante 2024 en '+$('localidad').value})}
 function renderForecast(){const x=chosen();if(!x)return;$('p-pred').textContent=f2(x.prediccion);$('p-real').textContent=f0(x.observado);$('p-error').textContent=f2(Math.abs(x.prediccion-x.observado));const d=x.base_mm12?100*(x.prediccion/x.base_mm12-1):0;$('p-delta').textContent=pct(d);$('p-base').textContent='MM12: '+f2(x.base_mm12)+' siniestros';$('p-loc').textContent=x.localidad+' · '+monthPretty(x.periodo);$('p-name').textContent=x.localidad;renderLocalChart('chart-p-local');const lm=metric(locRows()),lb=metric(locRows(),'base_mm12');const gain=lb.mae?(lb.mae-lm.mae)/lb.mae*100:0;$('local-analysis').innerHTML=`<div class="info-grid"><strong>Localidad</strong><div>${esc(x.localidad)}</div></div><div class="info-grid"><strong>Periodo</strong><div>${monthPretty(x.periodo)}</div></div><div class="info-grid"><strong>MAE local V2</strong><div>${f2(lm.mae)} siniestros / mes</div></div><div class="info-grid"><strong>MAE local MM12</strong><div>${f2(lb.mae)} siniestros / mes</div></div><div class="info-grid"><strong>Mejora 2024</strong><div class="${gain>=0?'good':'bad'}">${pct(gain)}</div></div><div class="info-grid"><strong>Interpretación</strong><div>${gain>=0?'En esta localidad V2 supera la referencia en 2024.':'En esta localidad la referencia MM12 supera a V2 en 2024.'}</div></div><div class="callout warning" style="margin-top:19px">Este resultado no constituye un pronóstico de futuro ni una estimación de riesgo individual.</div>`;
   const rows=[...monthRows()].sort(SORT==='cambio'?(a,b)=>(b.prediccion-b.base_mm12)-(a.prediccion-a.base_mm12):(a,b)=>b.prediccion-a.prediccion);$('ranking-body').innerHTML=rows.map((a,i)=>{let delta=a.base_mm12?100*(a.prediccion/a.base_mm12-1):null;return `<tr class="selectable" data-loc="${esc(a.localidad)}"><td>${i+1}</td><td>${esc(a.localidad)}</td><td class="num"><strong>${f2(a.prediccion)}</strong></td><td class="num">${f0(a.observado)}</td><td class="num">${f2(a.base_mm12)}</td><td class="num ${delta!==null?(delta>0?'bad':'good'):''}">${delta===null?'—':pct(delta)}</td><td class="num">${f2(Math.abs(a.prediccion-a.observado))}</td></tr>`}).join('')}
-function renderHistory(){const loc=$('localidad').value;$('h-name').textContent=loc;$('h-annual-name').textContent=loc;const allLoc=LOCALIDADES;const years=Array.from({length:9},(_,i)=>2017+i);const rows=group(H,x=>x.localidad+'|'+x.periodo.slice(0,4));const values=allLoc.flatMap(l=>years.map(y=>sum((rows.get(l+'|'+y)||[]).map(z=>z.valor))/12));const max=Math.max(1,...values);$('heatmap').innerHTML=`<thead><tr><th>Localidad</th>${years.map(y=>`<th>${y}</th>`).join('')}</tr></thead><tbody>`+allLoc.map(l=>`<tr class="${l===loc?'highlight':''}"><td>${esc(l)}</td>${years.map(y=>{const avg=sum((rows.get(l+'|'+y)||[]).map(z=>z.valor))/12;const alpha=(.07+.75*avg/max).toFixed(3);return `<td style="background:rgba(71,120,239,${alpha});color:${avg/max>.58?'white':'#37547c'}" data-loc="${esc(l)}" title="${esc(l)}, ${y}: ${f1(avg)} siniestros/mes">${f1(avg)}</td>`}).join('')}</tr>`).join('')+'</tbody>';
+function renderHistory(){const loc=$('localidad').value;$('h-name').textContent=loc;$('h-annual-name').textContent=loc;const allLoc=LOCALIDADES;const maxYear=Math.max(2025,...H.map(x=>Number(x.periodo.slice(0,4))));const years=Array.from({length:maxYear-2016},(_,i)=>2017+i);const rows=group(H,x=>x.localidad+'|'+x.periodo.slice(0,4));const values=allLoc.flatMap(l=>years.map(y=>sum((rows.get(l+'|'+y)||[]).map(z=>z.valor))/12));const max=Math.max(1,...values);$('heatmap').innerHTML=`<thead><tr><th>Localidad</th>${years.map(y=>`<th>${y}</th>`).join('')}</tr></thead><tbody>`+allLoc.map(l=>`<tr class="${l===loc?'highlight':''}"><td>${esc(l)}</td>${years.map(y=>{const avg=sum((rows.get(l+'|'+y)||[]).map(z=>z.valor))/12;const alpha=(.07+.75*avg/max).toFixed(3);return `<td style="background:rgba(71,120,239,${alpha});color:${avg/max>.58?'white':'#37547c'}" data-loc="${esc(l)}" title="${esc(l)}, ${y}: ${f1(avg)} siniestros/mes">${f1(avg)}</td>`}).join('')}</tr>`).join('')+'</tbody>';
   const hl=H.filter(x=>x.localidad===loc).sort((a,b)=>a.periodo.localeCompare(b.periodo));const labels=hl.map(x=>x.periodo.endsWith('-01')?x.periodo.slice(0,4):'');svgLine('chart-h-history',labels,[{name:'Observado',vals:hl.map(x=>x.valor),color:'#5079db'}],{tickIndices:hl.map((x,i)=>x.periodo.endsWith('-01')?i:-1).filter(i=>i>=0),title:'Histórico mensual observado de '+loc});const annual=years.map(y=>sum((rows.get(loc+'|'+y)||[]).map(x=>x.valor)));const mx=Math.max(1,...annual);$('annual-bars').innerHTML=years.map((y,i)=>`<div class="bar-col" title="${y}: ${f0(annual[i])} siniestros"><i style="height:${(annual[i]/mx*135+4).toFixed(1)}px"></i><b>${y}</b></div>`).join('')}
 function scatter(){const W=470,H=270,m={l:45,r:12,t:17,b:32},iw=W-m.l-m.r,ih=H-m.t-m.b,max=Math.max(1,...V.flatMap(x=>[x.observado,x.prediccion]))*1.06;const X=v=>m.l+v/max*iw,Y=v=>m.t+ih-v/max*ih;let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Dispersión 228 predicciones frente a observados">`;for(let k=0;k<=4;k++){const v=max*k/4;s+=`<line x1="${X(v)}" y1="${m.t}" x2="${X(v)}" y2="${m.t+ih}" stroke="#eaf0f8"/><line x1="${m.l}" y1="${Y(v)}" x2="${W-m.r}" y2="${Y(v)}" stroke="#eaf0f8"/><text x="${X(v)}" y="${H-10}" text-anchor="middle" font-size="10" fill="#8290a8">${f0(v)}</text><text x="${m.l-7}" y="${Y(v)+4}" text-anchor="end" font-size="10" fill="#8290a8">${f0(v)}</text>`}s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(max)}" y2="${Y(max)}" stroke="#f0a16f" stroke-width="2" stroke-dasharray="6 5"/>`;for(const v of V)s+=`<circle cx="${X(v.observado)}" cy="${Y(v.prediccion)}" r="2.8" fill="#4e7eef" fill-opacity=".55"><title>${esc(v.localidad)} ${v.periodo}: real ${v.observado}, modelo ${f1(v.prediccion)}</title></circle>`;s+=`<text x="${W/2}" y="${H-1}" text-anchor="middle" font-size="10" fill="#6d7a94">Observado</text><text x="12" y="${H/2}" text-anchor="middle" font-size="10" transform="rotate(-90 12 ${H/2})" fill="#6d7a94">Predicho</text>`;$('chart-scatter').innerHTML=s+'</svg>'}
 function renderPerformance(){const ma=metric(V),ba=metric(V,'base_mm12'),gain=ba.mae?(ba.mae-ma.mae)/ba.mae*100:0;$('d-mae').textContent=f2(ma.mae);$('d-base').textContent=f2(ba.mae);$('d-rmse').textContent=f2(ma.rmse);$('d-bias').textContent=(ma.bias>=0?'+':'')+f2(ma.bias);$('goal-status').innerHTML=`<strong>Meta inicial: reducir al menos el 10 % del MAE frente a MM12.</strong> Mejora real V2 durante 2024: <strong>${pct(gain)}</strong>. ${gain>=10?'La meta se alcanzó en esta validación.':'La meta no se alcanzó en esta validación.'} Las métricas corresponden a datos de 2024, no a prueba final 2025.`;
@@ -257,7 +291,92 @@ $('pl-resources').addEventListener('input',()=>{if(P)renderPlan()});
 $('pl-rule').addEventListener('change',()=>{if(P)renderPlan()});
 $('pl-export').addEventListener('click',exportPlanCSV);
 
-async function init(){try{const [rh,rv]=await Promise.all([fetch('/dashboard/data/datos.json',{cache:'no-store'}),fetch('/api/validacion',{cache:'no-store'})]);if(!rh.ok)throw Error('No responde /dashboard/data/datos.json (HTTP '+rh.status+')');if(!rv.ok)throw Error('Falta habilitar /api/validacion (HTTP '+rv.status+'). Instala el endpoint de inferencia en lote.');const [hist,back]=await Promise.all([rh.json(),rv.json()]);if(!Array.isArray(hist.historico))throw Error('El JSON histórico no contiene la lista historico');if(!Array.isArray(back.filas))throw Error('La API no contiene la lista filas');H=hist.historico.map(x=>({localidad:String(x.LOCALIDAD),periodo:String(x.PERIODO).slice(0,7),valor:Number(x.SINIESTROS)}));V=back.filas.map(x=>({localidad:String(x.localidad),periodo:String(x.periodo).slice(0,7),prediccion:Number(x.prediccion),observado:Number(x.observado),base_mm12:Number(x.base_mm12),mismo_mes_anterior:Number(x.mismo_mes_anterior)}));if(H.length!==2052||V.length!==228)throw Error('Revisar integridad: histórico '+H.length+' filas y validación '+V.length+' (esperado 2052 y 228).');if(V.some(x=>![x.prediccion,x.observado,x.base_mm12].every(Number.isFinite)))throw Error('Las predicciones contienen valores no numéricos');MODELO=String(back.modelo||'Modelo sin URI');LOCALIDADES=[...new Set(V.map(x=>x.localidad))].sort((a,b)=>a.localeCompare(b,'es'));MESES=[...new Set(V.map(x=>x.periodo))].sort();if(LOCALIDADES.length!==19||MESES.length!==12)throw Error('Cobertura de validación incompleta: '+LOCALIDADES.length+' localidades y '+MESES.length+' meses');$('localidad').innerHTML=LOCALIDADES.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('');$('localidad').value=LOCALIDADES.includes('KENNEDY')?'KENNEDY':LOCALIDADES[0];$('periodo').innerHTML=MESES.map(m=>`<option value="${esc(m)}">${monthPretty(m)}</option>`).join('');$('periodo').value='2024-01';$('version-tag').textContent='MLflow '+MODELO.split('/').at(-1)+' · validación 2024';$('connection-label').textContent='FastAPI + MLflow conectados';$('connection-dot').classList.add('ok');$('loading').hidden=true;$('content').hidden=false;renderAll();await loadPlan();}catch(e){$('loading').hidden=true;$('error').hidden=false;$('error').textContent='No es posible mostrar resultados reales: '+e.message+'. El tablero no presenta datos ficticios como reemplazo.';$('status-pill').classList.add('error');$('status-pill').textContent='Sin conexión validada';$('connection-label').textContent='Error de API';console.error(e)}}init();
+
+let AD_ID=null;
+function setAdminAccess(enabled,message) {
+  $('ad-access').textContent=message;
+  $('ad-form').hidden=!enabled;
+}
+async function loadAdminStatus() {
+  try{
+    const pub=await fetch('/api/estado-datos',{cache:'no-store'});
+    if(!pub.ok)throw Error('HTTP '+pub.status);
+    const status=await pub.json();
+    $('ad-status').innerHTML=[
+      ['Último mes observado',status.corte],
+      ['Localidades',status.localidades],
+      ['Registros localidad–mes',status.filas],
+      ['Modelo',status.modelo_servido],
+      ['Origen activo',status.dataset_actualizado?'Archivo actualizado':'Dataset inicial']
+    ].map(([n,v])=>'<div class="info-grid"><strong>'+esc(n)+'</strong><div>'+esc(v)+'</div></div>').join('');
+    if(!['127.0.0.1','localhost','::1','[::1]'].includes(location.hostname)){
+      setAdminAccess(false,'Modo de solo lectura: para cargar un archivo abre el tablero mediante un túnel SSH en http://127.0.0.1:8002/. No se habilitan operaciones administrativas desde la IP pública.');
+      return;
+    }
+    const adm=await fetch('/api/admin/estado',{cache:'no-store'});
+    if(!adm.ok)throw Error('Acceso administrativo no permitido (HTTP '+adm.status+')');
+    setAdminAccess(true,'Acceso administrativo local habilitado. La carga no cambia los datos activos hasta que revises y apruebes el candidato.');
+  }catch(e){setAdminAccess(false,'Administración aún no disponible: '+e.message);
+    $('ad-status').textContent='No se pudo consultar el estado. Comprueba /api/estado-datos.';
+  }
+}
+function uploadRawCSV(file,corte){
+  return new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST','/api/admin/preparar?corte='+encodeURIComponent(corte));
+    xhr.setRequestHeader('Content-Type','text/csv; charset=utf-8');
+    xhr.upload.onprogress=e=>{
+      if(e.lengthComputable)$('ad-upload-progress').textContent=
+        'Enviando archivo: '+Math.round(e.loaded/e.total*100)+' %. Después se validará en el servidor...';
+    };
+    xhr.onload=()=>{
+      let data={};try{data=JSON.parse(xhr.responseText)}catch{}
+      if(xhr.status>=200&&xhr.status<300)resolve(data);
+      else reject(Error(typeof data.detail==='string'?data.detail:'Error HTTP '+xhr.status));
+    };
+    xhr.onerror=()=>reject(Error('Error de red durante la carga.'));
+    xhr.send(file);
+  });
+}
+$('ad-preparar').addEventListener('click',async()=>{
+  const file=$('ad-file').files?.[0],corte=$('ad-corte').value;
+  if(!file||!corte){$('ad-upload-progress').textContent='Selecciona archivo y mes de corte.';return;}
+  if(file.size>450*1024*1024){$('ad-upload-progress').textContent='Archivo superior al límite de 450 MB.';return;}
+  const button=$('ad-preparar');button.disabled=true;
+  $('ad-upload-progress').textContent='Enviando el archivo...';
+  try{
+    const r=await uploadRawCSV(file,corte);
+    AD_ID=r.id;
+    $('ad-report').innerHTML=[
+      ['Fecha de corte',r.corte],
+      ['Meses nuevos',Object.keys(r.meses_nuevos||{}).map(k=>k+': '+r.meses_nuevos[k]).join(' · ')||'Sin meses nuevos'],
+      ['Meses históricos modificados',r.cambios_historicos],
+      ['Fechas inválidas',r.fechas_invalidas],
+      ['Registros de localidades desconocidas',r.localidades_desconocidas],
+      ['Filas preparadas',r.filas_candidatas],
+      ['Resultado',r.observacion]
+    ].map(([k,v])=>'<div class="info-grid"><strong>'+esc(k)+'</strong><div>'+esc(v)+'</div></div>').join('');
+    $('ad-review').hidden=false;
+    $('ad-confirm').checked=false;$('ad-activar').disabled=true;
+    $('ad-upload-progress').textContent='Candidato preparado; revisa el resumen antes de activarlo.';
+    $('ad-review').scrollIntoView({behavior:'smooth'});
+  }catch(e){$('ad-upload-progress').textContent='No se preparó el candidato: '+e.message;}
+  finally{button.disabled=false;}
+});
+$('ad-confirm').addEventListener('change',()=>{$('ad-activar').disabled=!$('ad-confirm').checked||!AD_ID;});
+$('ad-activar').addEventListener('click',async()=>{
+  if(!AD_ID||!$('ad-confirm').checked)return;
+  const button=$('ad-activar');button.disabled=true;
+  try{
+    const resp=await fetch('/api/admin/activar/'+encodeURIComponent(AD_ID),{method:'POST'});
+    const result=await resp.json();
+    if(!resp.ok)throw Error(result.detail||'HTTP '+resp.status);
+    $('ad-upload-progress').textContent='Datos activados. Nuevo mes proyectado: '+result.siguiente_mes+'. Recargando información...';
+    location.reload();
+  }catch(e){$('ad-upload-progress').textContent='No se activaron los datos: '+e.message;button.disabled=false;}
+});
+
+async function init(){try{const [rh,rv]=await Promise.all([fetch('/api/historico',{cache:'no-store'}),fetch('/api/validacion',{cache:'no-store'})]);if(!rh.ok)throw Error('No responde /api/historico (HTTP '+rh.status+')');if(!rv.ok)throw Error('Falta habilitar /api/validacion (HTTP '+rv.status+'). Instala el endpoint de inferencia en lote.');const [hist,back]=await Promise.all([rh.json(),rv.json()]);if(!Array.isArray(hist.historico))throw Error('El JSON histórico no contiene la lista historico');if(!Array.isArray(back.filas))throw Error('La API no contiene la lista filas');H=hist.historico.map(x=>({localidad:String(x.LOCALIDAD),periodo:String(x.PERIODO).slice(0,7),valor:Number(x.SINIESTROS)}));V=back.filas.map(x=>({localidad:String(x.localidad),periodo:String(x.periodo).slice(0,7),prediccion:Number(x.prediccion),observado:Number(x.observado),base_mm12:Number(x.base_mm12),mismo_mes_anterior:Number(x.mismo_mes_anterior)}));if(H.length<2052||V.length!==228||H.length%19!==0)throw Error('Revisar integridad: histórico '+H.length+' filas y validación '+V.length+' (esperado al menos 2052 y 228).');if(V.some(x=>![x.prediccion,x.observado,x.base_mm12].every(Number.isFinite)))throw Error('Las predicciones contienen valores no numéricos');MODELO=String(back.modelo||'Modelo sin URI');LOCALIDADES=[...new Set(V.map(x=>x.localidad))].sort((a,b)=>a.localeCompare(b,'es'));MESES=[...new Set(V.map(x=>x.periodo))].sort();if(LOCALIDADES.length!==19||MESES.length!==12)throw Error('Cobertura de validación incompleta: '+LOCALIDADES.length+' localidades y '+MESES.length+' meses');$('localidad').innerHTML=LOCALIDADES.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('');$('localidad').value=LOCALIDADES.includes('KENNEDY')?'KENNEDY':LOCALIDADES[0];$('periodo').innerHTML=MESES.map(m=>`<option value="${esc(m)}">${monthPretty(m)}</option>`).join('');$('periodo').value='2024-01';$('version-tag').textContent='MLflow '+MODELO.split('/').at(-1)+' · validación 2024';$('connection-label').textContent='FastAPI + MLflow conectados';$('connection-dot').classList.add('ok');$('loading').hidden=true;$('content').hidden=false;renderAll();await loadPlan();await loadAdminStatus();}catch(e){$('loading').hidden=true;$('error').hidden=false;$('error').textContent='No es posible mostrar resultados reales: '+e.message+'. El tablero no presenta datos ficticios como reemplazo.';$('status-pill').classList.add('error');$('status-pill').textContent='Sin conexión validada';$('connection-label').textContent='Error de API';console.error(e)}}init();
 </script>
 </body>
 </html>

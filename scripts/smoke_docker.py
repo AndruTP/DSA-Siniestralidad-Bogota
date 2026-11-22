@@ -5,6 +5,8 @@ del modelo, solo la continuidad funcional de su inferencia y sus endpoints.
 """
 import argparse
 import json
+import time
+import urllib.error
 import urllib.request
 
 
@@ -23,7 +25,22 @@ def main():
     args = parser.parse_args()
     base = args.base.rstrip("/")
 
-    salud = obtener(base, "/health")
+    # Docker Compose marca el contenedor como Started antes de que MLflow
+    # termine de cargar el modelo al iniciar Uvicorn.
+    limite = time.monotonic() + 180
+    while True:
+        try:
+            salud = obtener(base, "/health")
+            break
+        except (urllib.error.URLError, TimeoutError, ConnectionResetError) as exc:
+            if time.monotonic() >= limite:
+                raise RuntimeError(
+                    "La API Docker no estuvo disponible en 180 segundos. "
+                    "Verificar: sudo docker compose ps -a && "
+                    "sudo docker compose logs --tail=80 api"
+                ) from exc
+            time.sleep(3)
+
     datos = obtener(base, "/api/estado-datos")
     forecast = obtener(base, "/api/pronostico")
     validacion = obtener(base, "/api/validacion")

@@ -38,7 +38,8 @@ services:
     image: dsa-siniestralidad:docker-v1
     init: true
     network_mode: host
-    restart: unless-stopped
+    # MLflow se ejecuta bajo demanda: en t2.medium consumió ~1.94 GiB.
+    restart: "no"
     working_dir: /home/ubuntu
     volumes:
       - ./runtime/mlflow-docker/mlflow.db:/home/ubuntu/mlflow.db

@@ -2,15 +2,18 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+import os
 import mlflow
 import pandas as pd
 
 app = FastAPI(title="DSA - Siniestralidad Bogotá")
 
-mlflow.set_tracking_uri("http://127.0.0.1:8050")
+mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "http://127.0.0.1:8050"))
 
-MODEL_URI = "models:/DSA-Siniestralidad-Bogota-Offset/2"
-modelo = mlflow.pyfunc.load_model(MODEL_URI)
+MODEL_URI = os.environ.get("MODEL_URI", "models:/DSA-Siniestralidad-Bogota-Offset/2")
+# Docker puede usar una copia aprobada y verificada del mismo modelo V2.
+# Sin MODEL_LOAD_URI se conserva el comportamiento original de EC2.
+modelo = mlflow.pyfunc.load_model(os.environ.get("MODEL_LOAD_URI", MODEL_URI))
 
 ruta_datos = Path(
     "entregas/entrega_final/dataset_modelado_2017_2025.csv"

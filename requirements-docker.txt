@@ -1,0 +1,9 @@
+# Para reproducir el modelo MLflow V2 existente en EC2 (Python 3.14).
+# Evitar actualizar scikit-learn sin comprobar compatibilidad de deserialización.
+mlflow==3.17.1
+scikit-learn==1.9.1
+pandas>=2.3,<3
+numpy>=2.3,<3
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+cloudpickle>=3.1,<4

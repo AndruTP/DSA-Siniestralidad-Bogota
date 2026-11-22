@@ -30,7 +30,8 @@ def main():
 
     assert salud["status"] == "ok", salud
     assert datos["corte"] == args.corte_esperado, datos
-    assert datos["localidades"] == 19, datos\n    assert datos["filas"] == 2242, datos
+    assert datos["localidades"] == 19, datos
+    assert datos["filas"] == 2242, datos
     assert datos["dataset_actualizado"] is True, datos
     assert forecast["ultimo_mes_observado"] == args.corte_esperado, forecast
     assert forecast["periodo"] == args.pronostico_esperado, forecast

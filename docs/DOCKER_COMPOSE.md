@@ -90,6 +90,32 @@ ssh -N -i "$key" -L 8003:127.0.0.1:18001 ubuntu@IP_ACTUAL_EC2
 
 Dashboard: `http://127.0.0.1:8003/`.
 
+## Incidencia AWS Academy y perfil de bajo consumo
+
+El 22 de noviembre de 2026 se documentaron interrupciones de SSH, reinicio
+del host y consumo de aproximadamente 1,94 GiB por MLflow Docker en t2.medium.
+El diagnóstico detallado está en
+[`INCIDENTE_AWS_ACADEMY_RECURSOS_2026-11-22.md`](INCIDENTE_AWS_ACADEMY_RECURSOS_2026-11-22.md).
+
+La API usa el modelo V2 exportado y **funciona sin MLflow Docker activo**.
+El perfil `mlflow` queda bajo demanda con `restart: "no"`, para no volver
+a levantar el servicio pesado tras reiniciar EC2. Para aplicar al entorno
+que ya existe (sin iniciarlo):
+
+```bash
+cd ~/DSA-Siniestralidad-Bogota
+git fetch origin
+git show origin/feature/dsa-10-docker-compose:compose.yaml > ~/dsa-docker-build/compose.yaml
+sudo docker update --restart=no dsa-siniestralidad-mlflow-1
+cd ~/dsa-docker-build
+sudo docker compose ps -a
+python3 scripts/smoke_docker.py
+```
+
+No hace falta reconstruir la imagen. Mantener MLflow apagado salvo cuando
+se vayan a revisar experimentos. El proceso original de MLflow en el host
+también debe gestionarse conscientemente para evitar duplicaciones.
+
 ## MLflow en Docker (opcional después de confirmar la API)
 
 MLflow original es un servidor separado y sigue disponible en 8050. Para

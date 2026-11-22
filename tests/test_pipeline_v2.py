@@ -43,6 +43,19 @@ class PruebasPipeline(unittest.TestCase):
         self.assertTrue(p["SINIESTROS"].isna().all())
         self.assertTrue(p["ESTACIONAL_CIUDAD"].notna().all())
 
+    def test_panel_ya_enriquecido_como_el_de_fastapi(self):
+        """Regresión: la API mantiene EWM_6 y ESTACIONAL_CIUDAD en df."""
+        panel = panel_ficticio()
+        previo = construir_siguiente_mes(panel)
+        enriquecido = agregar_caracteristicas_v2(panel)
+        nuevo = construir_siguiente_mes(enriquecido)
+        self.assertEqual(len(nuevo), len(previo))
+        self.assertIn("ESTACIONAL_CIUDAD", nuevo.columns)
+        self.assertNotIn("ESTACIONAL_CIUDAD_x", nuevo.columns)
+        self.assertNotIn("ESTACIONAL_CIUDAD_y", nuevo.columns)
+        np.testing.assert_allclose(nuevo["ESTACIONAL_CIUDAD"], previo["ESTACIONAL_CIUDAD"])
+        np.testing.assert_allclose(nuevo["EWM_6"], previo["EWM_6"])
+
     def test_no_permitir_saltos_de_mes(self):
         with self.assertRaises(ValueError):
             construir_siguiente_mes(panel_ficticio(), "2022-03-01")

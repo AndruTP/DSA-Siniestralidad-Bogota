@@ -60,7 +60,12 @@ def agregar_caracteristicas_v2(df):
     ESTACIONAL_CIUDAD usa únicamente el MISMO MES de años anteriores:
     el desplazamiento (shift) es esencial para evitar fuga de información.
     """
-    extendido = df.sort_values(["LOCALIDAD", "PERIODO"]).copy()
+    # La API puede entregar un panel ya enriquecido. Recalcular siempre estas
+    # columnas desde el historial evita sufijos _x/_y durante el merge y
+    # garantiza que el valor del mes proyectado no sea reutilizado.
+    extendido = (df.sort_values(["LOCALIDAD", "PERIODO"])
+                 .drop(columns=["EWM_6", "ESTACIONAL_CIUDAD", "RELATIVO"],
+                       errors="ignore").copy())
     serie = extendido.groupby("LOCALIDAD")["SINIESTROS"]
 
     extendido["EWM_6"] = serie.transform(

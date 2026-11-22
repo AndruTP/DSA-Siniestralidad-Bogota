@@ -156,11 +156,20 @@ def prevalidar_accidente(origen, referencia, corte, *, chunksize=60000):
     nuevo = candidato.set_index(["LOCALIDAD", "PERIODO"])["SINIESTROS"].astype(int)
     dif = (nuevo.reindex(actual.index) != actual)
     inconsistencias = int(dif.sum())
-    ejemplos = [
+    # Guardar diagnóstico completo, no solo diez ejemplos, para revisión humana.
+    cambios = [
         {"localidad": idx[0], "mes": idx[1].strftime("%Y-%m"),
-         "vigente": int(actual.loc[idx]), "candidato": int(nuevo.loc[idx])}
-        for idx in actual.index[dif][:10]
+         "vigente": int(actual.loc[idx]), "candidato": int(nuevo.loc[idx]),
+         "diferencia": int(nuevo.loc[idx] - actual.loc[idx])}
+        for idx in actual.index[dif]
     ]
+    ejemplos = cambios[:10]
+    cambios_por_anio = dict(sorted(Counter(
+        row["mes"][:4] for row in cambios
+    ).items()))
+    cambios_por_mes = dict(sorted(Counter(
+        row["mes"] for row in cambios
+    ).items()))
     periodo_nuevo = candidato[candidato["PERIODO"] > ultimo_vigente]
     agregados_mes = {
         t.strftime("%Y-%m"): int(s)
@@ -198,6 +207,11 @@ def prevalidar_accidente(origen, referencia, corte, *, chunksize=60000):
         "hash_sha256_referencia": _hash_archivo(referencia),
         "historial_modificado_filas": inconsistencias,
         "ejemplos_cambios_historicos": ejemplos,
+        "cambios_historicos": cambios,
+        "cambios_por_anio": cambios_por_anio,
+        "cambios_por_mes": cambios_por_mes,
+        "variacion_neta_historico": int(sum(x["diferencia"] for x in cambios)),
+        "variacion_absoluta_historico": int(sum(abs(x["diferencia"]) for x in cambios)),
         "meses_nuevos": agregados_mes,
         "localidades": len(localidades),
         "filas_candidatas": len(candidato),

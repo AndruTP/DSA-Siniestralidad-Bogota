@@ -1,0 +1,56 @@
+# ETAPA DE MIGRACIÓN EC2 (Linux): red del host para preservar la restricción
+# de /api/admin/* a localhost. El servicio actual 8001/8050 sigue intacto.
+name: dsa-siniestralidad
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dsa-siniestralidad:docker-v1
+    init: true
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: "1"
+      MLFLOW_TRACKING_URI: "${MLFLOW_TRACKING_URI:-http://127.0.0.1:8050}"
+      MODEL_URI: "models:/DSA-Siniestralidad-Bogota-Offset/2"
+      # Copia inmutable del mismo artefacto V2 aprobado por MLflow.
+      # Así la API arranca aunque el tracking server esté reiniciándose.
+      MODEL_LOAD_URI: /app/runtime/serving/modelo_v2
+    volumes:
+      - ./runtime:/app/runtime
+    command:
+      - sh
+      - -c
+      - "exec uvicorn api_dsa:app --host 127.0.0.1 --port ${API_DOCKER_PORT:-18001}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:${API_DOCKER_PORT:-18001}/health',timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+      start_period: 90s
+
+  mlflow:
+    # El API funciona con el modelo exportado aun si este perfil está apagado.
+    # Activar con: docker compose --profile mlflow up -d mlflow
+    profiles: ["mlflow"]
+    image: dsa-siniestralidad:docker-v1
+    init: true
+    network_mode: host
+    restart: unless-stopped
+    working_dir: /home/ubuntu
+    volumes:
+      - ./runtime/mlflow-docker/mlflow.db:/home/ubuntu/mlflow.db
+      - ./runtime/mlflow-docker/mlartifacts:/home/ubuntu/mlartifacts
+      - ./runtime/mlflow-docker/mlruns:/home/ubuntu/mlruns
+    command:
+      - sh
+      - -c
+      - "exec mlflow server --backend-store-uri sqlite:////home/ubuntu/mlflow.db --artifacts-destination /home/ubuntu/mlartifacts --host 127.0.0.1 --port ${MLFLOW_DOCKER_PORT:-18050} --workers 1"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:${MLFLOW_DOCKER_PORT:-18050}/',timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+      start_period: 90s

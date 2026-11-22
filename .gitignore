@@ -9,3 +9,4 @@ logs/
 # Archivos de carga y validación local (no publicarlos en Git)
 staging/
 resultados_pipeline/
+runtime/

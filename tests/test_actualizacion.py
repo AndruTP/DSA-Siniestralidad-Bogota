@@ -47,8 +47,16 @@ class PruebasActualizacion(unittest.TestCase):
         self.assertEqual(len(df), 19 * 109)
 
     def test_bloquea_una_modificacion_historica(self):
-        # Un registro antiguo desaparece del archivo acumulativo.
-        incompleto = self.registros[1:]
+        # Eliminamos un registro de enero de 2024, que sí está en el
+        # dataset modelado de referencia (2017–2025). No eliminar uno
+        # de enero de 2016: esa fila no altera sus conteos de 2017+.
+        incompleto = [
+            r for r in self.registros
+            if not (
+                r["LOCALIDAD"] == self.localidades[0]
+                and r["FECHA_OCURRENCIA_ACC"] == "2024-01-01"
+            )
+        ]
         extra = [
             {"LOCALIDAD": l, "GRAVEDAD": "CON HERIDOS",
              "FECHA_OCURRENCIA_ACC": "2026-01-05"}

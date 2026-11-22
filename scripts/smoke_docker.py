@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--base", default="http://127.0.0.1:18001")
     parser.add_argument("--corte-esperado", default="2026-10")
     parser.add_argument("--pronostico-esperado", default="2026-11")
+    parser.add_argument("--publico", action="store_true")
     args = parser.parse_args()
     base = args.base.rstrip("/")
 
@@ -58,6 +59,22 @@ def main():
     assert datos["modelo_servido"] == forecast["modelo"] == salud["modelo"]
     top = forecast["predicciones"][0]
     assert top["localidad"] == "KENNEDY", top
+    if args.publico:
+        with urllib.request.urlopen(base + "/", timeout=45) as response:
+            assert 'data-publicacion="railway"' in response.read().decode("utf-8")
+        for metodo, ruta in (
+            ("GET", "/api/admin/estado"),
+            ("POST", "/api/admin/preparar?corte=2026-10"),
+            ("POST", "/api/admin/activar/prueba"),
+        ):
+            request = urllib.request.Request(base + ruta, method=metodo)
+            try:
+                with urllib.request.urlopen(request, timeout=45) as response:
+                    raise AssertionError(f"{metodo} {ruta}: HTTP {response.status}")
+            except urllib.error.HTTPError as error:
+                assert error.code == 404, (metodo, ruta, error.code)
+        esquema = obtener(base, "/openapi.json")
+        assert not any(ruta.startswith("/api/admin/") for ruta in esquema["paths"])
     print(json.dumps({
         "estado": "OK",
         "corte": datos["corte"],

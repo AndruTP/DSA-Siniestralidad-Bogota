@@ -18,4 +18,4 @@ COPY --chown=appuser:appuser entregas/entrega_final/dataset_modelado_2017_2025.c
 
 USER appuser
 EXPOSE 18001
-CMD ["uvicorn", "api_dsa:app", "--host", "127.0.0.1", "--port", "18001"]
+CMD ["sh", "-c", "if [ -n \"$RAILWAY_PROJECT_ID\" ]; then exec uvicorn api_dsa:app --host 0.0.0.0 --port \"${PORT:?Railway debe asignar PORT}\"; fi; exec uvicorn api_dsa:app --host 127.0.0.1 --port 18001"]

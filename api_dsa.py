@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, FastAPI, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import os
@@ -7,13 +7,26 @@ import mlflow
 import pandas as pd
 
 app = FastAPI(title="DSA - Siniestralidad Bogotá")
+PUBLICACION_RAILWAY = bool(os.environ.get("RAILWAY_PROJECT_ID")) or (
+    os.environ.get("DSA_PUBLICACION_RAILWAY") == "1"
+)
+RUNTIME = Path(__file__).resolve().parent / "runtime"
+admin = APIRouter(prefix="/api/admin")
 
-mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "http://127.0.0.1:8050"))
+if not PUBLICACION_RAILWAY:
+    mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "http://127.0.0.1:8050"))
 
-MODEL_URI = os.environ.get("MODEL_URI", "models:/DSA-Siniestralidad-Bogota-Offset/2")
+MODELO_V2 = "models:/DSA-Siniestralidad-Bogota-Offset/2"
+MODEL_URI = MODELO_V2 if PUBLICACION_RAILWAY else os.environ.get("MODEL_URI", MODELO_V2)
 # Docker puede usar una copia aprobada y verificada del mismo modelo V2.
 # Sin MODEL_LOAD_URI se conserva el comportamiento original de EC2.
-modelo = mlflow.pyfunc.load_model(os.environ.get("MODEL_LOAD_URI", MODEL_URI))
+if PUBLICACION_RAILWAY:
+    ruta_modelo = RUNTIME / "serving" / "modelo_v2"
+    if not (ruta_modelo / "MLmodel").is_file():
+        raise RuntimeError("Falta el modelo MLflow V2 exportado en el volumen.")
+    modelo = mlflow.pyfunc.load_model(str(ruta_modelo))
+else:
+    modelo = mlflow.pyfunc.load_model(os.environ.get("MODEL_LOAD_URI", MODEL_URI))
 
 ruta_datos = Path(
     "entregas/entrega_final/dataset_modelado_2017_2025.csv"
@@ -96,6 +109,9 @@ def predict(localidad: str, periodo: str):
 
 @app.get("/")
 def dashboard():
+    if PUBLICACION_RAILWAY:
+        html = Path("tablero_siniestralidad.html").read_text(encoding="utf-8")
+        return HTMLResponse(html.replace("<body>", '<body data-publicacion="railway">', 1))
     return FileResponse("tablero_siniestralidad.html")
 
 app.mount(
@@ -194,7 +210,7 @@ from siniestralidad.features import (
 )
 
 _RAIZ = _Path(__file__).resolve().parent
-_OPERACION = _RAIZ / "runtime" / "actualizaciones"
+_OPERACION = RUNTIME / "actualizaciones"
 _PENDIENTES = _OPERACION / "pendientes"
 _ACTIVO = _OPERACION / "activo" / "dataset_modelado.csv"
 _META_ACTIVA = _OPERACION / "activo" / "version.json"
@@ -225,8 +241,14 @@ def _cargar_panel_activo():
 
 
 # Recuperar la última versión aprobada al reiniciar Uvicorn.
+if PUBLICACION_RAILWAY and not _ACTIVO.is_file():
+    raise RuntimeError("Falta el dataset aprobado en el volumen.")
 if _ACTIVO.exists():
     _cargar_panel_activo()
+if PUBLICACION_RAILWAY:
+    corte = df["PERIODO"].max().strftime("%Y-%m")
+    if (corte, len(df), df["LOCALIDAD"].nunique()) != ("2026-10", 2242, 19):
+        raise RuntimeError("El dataset del volumen no coincide con el corte aprobado 2026-10.")
 
 
 @app.get("/api/historico")
@@ -257,7 +279,7 @@ def estado_datos():
     }
 
 
-@app.get("/api/admin/estado")
+@admin.get("/estado")
 def admin_estado(request: _Request):
     _solo_local(request)
     version = _json.loads(_META_ACTIVA.read_text(encoding="utf-8")) if _META_ACTIVA.exists() else {}
@@ -267,7 +289,7 @@ def admin_estado(request: _Request):
                                 else "dataset original de la entrega"}
 
 
-@app.post("/api/admin/preparar")
+@admin.post("/preparar")
 async def admin_preparar(request: _Request, corte: str):
     _solo_local(request)
     # HTTP octet-stream; no dependencia de python-multipart. Se escribe
@@ -322,7 +344,7 @@ async def admin_preparar(request: _Request, corte: str):
         raise _HTTPException(422, f"Archivo rechazado: {exc}") from exc
 
 
-@app.post("/api/admin/activar/{operacion_id}")
+@admin.post("/activar/{operacion_id}")
 async def admin_activar(request: _Request, operacion_id: str):
     _solo_local(request)
     if len(operacion_id) != 32 or any(c not in "0123456789abcdef" for c in operacion_id):
@@ -380,3 +402,7 @@ async def admin_activar(request: _Request, operacion_id: str):
         "reentrenado": False,
         "indicacion": "Actualiza el Dashboard: histórico y /api/pronostico usan este dataset.",
     }
+
+
+if not PUBLICACION_RAILWAY:
+    app.include_router(admin)
